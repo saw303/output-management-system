@@ -1,0 +1,14 @@
+version: "3.9"
+services:
+  database:
+    image: mariadb:10.6.5-focal
+    environment:
+      MYSQL_ROOT_PASSWORD: root_secret
+      MYSQL_DATABASE: oms
+      MYSQL_USER: oms
+      MYSQL_PASSWORD: oms
+      TZ: "Europe/Zurich"
+    tmpfs:
+      - /var/lib/mysql:rw
+    ports:
+      - "127.0.0.1:3306:3306"

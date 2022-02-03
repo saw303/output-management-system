@@ -1,0 +1,22 @@
+micronaut:
+  application:
+    name: oms
+netty:
+  default:
+    allocator:
+      max-order: 3
+
+datasources:
+  default:
+    url: "jdbc:${DB_TYPE:mariadb}://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:oms}"
+    driverClassName: org.mariadb.jdbc.Driver
+    username: "${DB_USER:oms}"
+    password: "${DB_PWD:oms}"
+    dialect: org.hibernate.dialect.MariaDB106Dialect
+
+jpa.default.properties.hibernate.hbm2ddl.auto: validate
+
+flyway:
+  datasources:
+    default:
+      locations: classpath:db/migrations/mariadb

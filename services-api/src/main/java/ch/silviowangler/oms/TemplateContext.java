@@ -15,6 +15,7 @@
 */
 package ch.silviowangler.oms;
 
+import io.micronaut.http.MediaType;
 import java.util.Locale;
 import java.util.UUID;
 import lombok.Value;
@@ -25,4 +26,5 @@ public class TemplateContext {
   private UUID templateId;
   private Locale locale;
   private String jsonAsString;
+  private MediaType requestedOutput;
 }

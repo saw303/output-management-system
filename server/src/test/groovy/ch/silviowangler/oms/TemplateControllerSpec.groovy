@@ -1,10 +1,18 @@
 package ch.silviowangler.oms
 
 import ch.silviowangler.oms.clients.TemplateClient
+import io.micronaut.http.HttpHeaders
+import io.micronaut.http.HttpResponse
 import io.micronaut.http.MediaType
 import io.micronaut.test.extensions.spock.annotation.MicronautTest
 import jakarta.inject.Inject
 import spock.lang.Specification
+
+import static io.micronaut.http.HttpHeaders.CONTENT_TYPE
+import static io.micronaut.http.MediaType.TEXT_PLAIN
+import static io.micronaut.http.MediaType.TEXT_PLAIN
+import static io.micronaut.http.MediaType.TEXT_PLAIN_TYPE
+import static java.util.Locale.GERMAN
 
 @MicronautTest
 class TemplateControllerSpec extends Specification {
@@ -22,8 +30,8 @@ class TemplateControllerSpec extends Specification {
         given:
         TemplateModel modelBefore = new TemplateModel(
                 name: 'Silvios Template',
-                contentType: MediaType.TEXT_HTML,
-                content: '<html><head><title>Hello</title></head></html>'
+                contentType: TEXT_PLAIN,
+                content: 'Hello!'
         )
 
         when:
@@ -65,6 +73,15 @@ class TemplateControllerSpec extends Specification {
                 contentType == modelBefore.contentType
             }
         }
+
+        when:
+        HttpResponse response = templateClient.process(modelAfter.getId(), GERMAN, TEXT_PLAIN_TYPE, "{}")
+
+        then:
+        response.header(CONTENT_TYPE) == TEXT_PLAIN
+
+        and:
+        response.body() as String == 'Hello!'
 
         when:
         templateClient.deleteTemplate(modelAfter.getId())

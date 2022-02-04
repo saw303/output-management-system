@@ -15,11 +15,16 @@
 */
 package ch.silviowangler.oms;
 
+import static io.micronaut.http.MediaType.APPLICATION_PDF;
+import static io.micronaut.http.MediaType.TEXT_PLAIN;
+
 import io.micronaut.http.HttpResponse;
+import io.micronaut.http.MediaType;
 import io.micronaut.http.annotation.Body;
 import io.micronaut.http.annotation.Controller;
 import io.micronaut.http.annotation.Header;
 import io.micronaut.http.annotation.Post;
+import io.micronaut.http.annotation.Produces;
 import io.micronaut.scheduling.TaskExecutors;
 import io.micronaut.scheduling.annotation.ExecuteOn;
 import java.util.Locale;
@@ -33,14 +38,16 @@ public class OmsControllerV1 {
   private final TemplateService templateService;
 
   @Post("/{templateId}/process")
+  @Produces(value = {APPLICATION_PDF, TEXT_PLAIN})
   @ExecuteOn(TaskExecutors.SCHEDULED)
   public HttpResponse renderTemplate(
-      UUID templateId, @Header Locale acceptLanguage, @Body String body) {
+      UUID templateId,
+      @Header Locale acceptLanguage,
+      @Header(defaultValue = APPLICATION_PDF) MediaType accept,
+      @Body String body) {
 
     ProcessResult processResult =
-        templateService.process(new TemplateContext(templateId, acceptLanguage, body));
-    return HttpResponse.ok()
-        .contentType(processResult.getMediaType())
-        .body(processResult.getContent());
+        templateService.process(new TemplateContext(templateId, acceptLanguage, body, accept));
+    return HttpResponse.ok().contentType(accept).body(processResult.getContent());
   }
 }

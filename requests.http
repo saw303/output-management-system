@@ -1,5 +1,6 @@
 POST http://localhost:8080/api/v1/templates/35458f63-0486-4f8b-a2af-5b026148fc2f/process
 Accept-Language: de
+Accept: text/plain
 Content-Type: application/json
 
 {

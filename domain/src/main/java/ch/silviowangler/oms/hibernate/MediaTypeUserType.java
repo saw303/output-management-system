@@ -1,0 +1,97 @@
+/*
+   Copyright 2022 - 2013-2021 Silvio Wangler
+
+   Licensed under the Apache License, Version 2.0 (the "License");
+   you may not use this file except in compliance with the License.
+   You may obtain a copy of the License at
+
+     http://www.apache.org/licenses/LICENSE-2.0
+
+   Unless required by applicable law or agreed to in writing, software
+   distributed under the License is distributed on an "AS IS" BASIS,
+   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+   See the License for the specific language governing permissions and
+   limitations under the License.
+*/
+package ch.silviowangler.oms.hibernate;
+
+import io.micronaut.http.MediaType;
+import java.io.Serializable;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.Objects;
+import org.hibernate.HibernateException;
+import org.hibernate.engine.spi.SharedSessionContractImplementor;
+import org.hibernate.type.StringType;
+import org.hibernate.usertype.UserType;
+
+/**
+ * Maps {@link MediaType} to a SQL VARCHAR.
+ *
+ * @author Silvio Wangler (silvio.wangler@onstructive.ch)
+ */
+public class MediaTypeUserType implements UserType {
+  @Override
+  public int[] sqlTypes() {
+    return new int[] {Types.VARCHAR};
+  }
+
+  @Override
+  public Class returnedClass() {
+    return MediaType.class;
+  }
+
+  @Override
+  public boolean equals(Object x, Object y) throws HibernateException {
+    return Objects.equals(x, y);
+  }
+
+  @Override
+  public int hashCode(Object x) throws HibernateException {
+    return Objects.hashCode(x);
+  }
+
+  @Override
+  public Object nullSafeGet(
+      ResultSet rs, String[] names, SharedSessionContractImplementor session, Object owner)
+      throws HibernateException, SQLException {
+    String o = (String) StringType.INSTANCE.nullSafeGet(rs, names, session, owner);
+    return o == null ? null : MediaType.of(o);
+  }
+
+  @Override
+  public void nullSafeSet(
+      PreparedStatement st, Object value, int index, SharedSessionContractImplementor session)
+      throws HibernateException, SQLException {
+
+    StringType.INSTANCE.nullSafeSet(
+        st, value != null ? ((MediaType) value).getName() : null, index, session);
+  }
+
+  @Override
+  public Object deepCopy(Object value) throws HibernateException {
+    return value;
+  }
+
+  @Override
+  public boolean isMutable() {
+    return false;
+  }
+
+  @Override
+  public Serializable disassemble(Object value) throws HibernateException {
+    return (Serializable) value;
+  }
+
+  @Override
+  public Object assemble(Serializable cached, Object owner) throws HibernateException {
+    return cached;
+  }
+
+  @Override
+  public Object replace(Object original, Object target, Object owner) throws HibernateException {
+    return deepCopy(original);
+  }
+}

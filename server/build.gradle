@@ -1,0 +1,28 @@
+plugins {
+    id 'groovy'
+    id 'com.github.johnrengelman.shadow'
+}
+
+dependencies {
+
+    implementation project(":${rootProject.name}-rest-api")
+    implementation project(":${rootProject.name}-services")
+    implementation project(":${rootProject.name}-domain")
+
+    implementation("io.micronaut.flyway:micronaut-flyway")
+    runtimeOnly "org.flywaydb:flyway-mysql:8.4.2"
+    implementation("io.micronaut.sql:micronaut-jdbc-hikari")
+    implementation("jakarta.annotation:jakarta.annotation-api")
+    runtimeOnly("org.mariadb.jdbc:mariadb-java-client")
+    runtimeOnly("ch.qos.logback:logback-classic")
+
+    testImplementation("org.testcontainers:mariadb")
+    testImplementation("org.testcontainers:spock")
+    testImplementation("org.testcontainers:testcontainers")
+}
+
+application {
+    mainClass.set("ch.silviowangler.oms.Application")
+}
+
+graalvmNative.toolchainDetection = false

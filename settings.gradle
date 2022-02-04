@@ -28,3 +28,11 @@ dependencyResolutionManagement {
 }
 
 rootProject.name="oms"
+
+include 'server'
+include 'services'
+include 'services-api'
+include 'domain'
+include 'rest-api'
+
+rootProject.children.each { it.name = "${rootProject.name}-${it.name}" }

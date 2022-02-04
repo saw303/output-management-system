@@ -1,0 +1,5 @@
+dependencies {
+    api project(":${rootProject.name}-services-api")
+    implementation project(":${rootProject.name}-domain")
+    implementation 'org.thymeleaf:thymeleaf:3.0.14.RELEASE'
+}

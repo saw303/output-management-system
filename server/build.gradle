@@ -17,3 +17,10 @@ application {
 }
 
 graalvmNative.toolchainDetection = false
+
+tasks.named("dockerfile") {
+  baseImage = "openjdk:17.0.2-jdk-slim-buster"
+  args "-Dmicronaut.server.port=8080"
+  instruction """RUN apt-get update && apt-get install -y curl libreoffice-writer && rm -rf /var/lib/apt/lists/*"""
+  instruction """HEALTHCHECK CMD curl -s localhost:8090/health | grep '"status":"UP"' """
+}

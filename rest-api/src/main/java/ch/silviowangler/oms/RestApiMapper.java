@@ -17,18 +17,10 @@ package ch.silviowangler.oms;
 
 import ch.onstructive.mapping.mapstruct.MicronautMappingConfig;
 import io.micronaut.http.MediaType;
-import org.mapstruct.InheritInverseConfiguration;
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 
 @Mapper(config = MicronautMappingConfig.class)
 public interface RestApiMapper {
-
-  @Mapping(target = "contentType", source = "mediaType")
-  TemplateModel toTemplateModel(TemplateDto templateDto);
-
-  @InheritInverseConfiguration
-  TemplateDto toTemplateDto(TemplateModel templateModel);
 
   default MediaType toMediaType(String s) {
     return MediaType.of(s);

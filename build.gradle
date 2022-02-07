@@ -27,7 +27,6 @@ subprojects { subproject ->
         implementation("io.micronaut:micronaut-http-client")
         implementation("io.micronaut:micronaut-jackson-databind")
         implementation("io.micronaut:micronaut-runtime")
-        implementation("io.micronaut.data:micronaut-data-hibernate-jpa")
 
         compileOnly("org.projectlombok:lombok")
 

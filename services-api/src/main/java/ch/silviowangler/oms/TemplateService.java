@@ -15,18 +15,7 @@
 */
 package ch.silviowangler.oms;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
 public interface TemplateService {
-  List<TemplateDto> findAllTemplates();
-
-  Optional<TemplateDto> findTemplate(UUID templateId);
-
-  TemplateDto saveTemplate(TemplateDto templateDto);
-
-  void deleteTemplate(UUID templateId);
 
   ProcessResult process(TemplateContext templateContext);
 }

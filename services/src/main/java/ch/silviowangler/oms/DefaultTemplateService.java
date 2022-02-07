@@ -15,89 +15,58 @@
 */
 package ch.silviowangler.oms;
 
+import static ch.onstructive.util.Assertions.requireNonEmpty;
+
 import ch.onstructive.exceptions.NotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import io.micronaut.transaction.annotation.ReadOnly;
 import jakarta.inject.Singleton;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Optional;
+import java.util.Collection;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import javax.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
 @Singleton
-@RequiredArgsConstructor
 @Slf4j
 public class DefaultTemplateService implements TemplateService {
 
-  private final TemplateRepository templateRepository;
-  private final TemplateMapper templateMapper;
   private final ObjectMapper objectMapper;
   private final TemplateEngine templateEngine;
+  private final Collection<Instruction> instructions;
 
-  @Override
-  @ReadOnly
-  public List<TemplateDto> findAllTemplates() {
-    return templateRepository.findAll().stream()
-        .map(templateMapper::toTemplateDto)
-        .collect(Collectors.toList());
-  }
-
-  @Override
-  @ReadOnly
-  public Optional<TemplateDto> findTemplate(UUID templateId) {
-    return templateRepository.findById(templateId).map(templateMapper::toTemplateDto);
-  }
-
-  @Override
-  @Transactional
-  public TemplateDto saveTemplate(TemplateDto templateDto) {
-
-    Template template;
-    if (templateDto.getId() == null) {
-      template = new Template();
-    } else {
-      template =
-          templateRepository
-              .findById(templateDto.getId())
-              .orElseThrow(() -> new NotFoundException("template", templateDto.getId()));
-    }
-
-    templateMapper.toTemplate(templateDto, template);
-    template = templateRepository.save(template);
-    return templateMapper.toTemplateDto(template);
-  }
-
-  @Override
-  @Transactional
-  public void deleteTemplate(UUID templateId) {
-    this.templateRepository.deleteById(templateId);
+  public DefaultTemplateService(
+      ObjectMapper objectMapper,
+      TemplateEngine templateEngine,
+      Collection<Instruction> instructions) {
+    this.objectMapper = objectMapper;
+    this.templateEngine = templateEngine;
+    this.instructions = requireNonEmpty(instructions, "instructions");
   }
 
   @Override
   public ProcessResult process(TemplateContext templateContext) {
 
-    Template template =
-        templateRepository
-            .findById(templateContext.getTemplateId())
-            .orElseThrow(() -> new NotFoundException("template", templateContext.getTemplateId()));
-
+    Instruction instruction = findInstruction(templateContext);
     Context context = new Context(templateContext.getLocale());
 
+    UUID templateId = templateContext.getTemplateId();
     try {
-      context.setVariable(
-          "document", objectMapper.readValue(templateContext.getJsonAsString(), HashMap.class));
+      Object bindingObject =
+          objectMapper.readValue(templateContext.getJsonAsString(), instruction.getBindingClass());
+      context.setVariable(instruction.getBindingVariableName(), bindingObject);
       return new ProcessResult(
-          template.getMediaType(), templateEngine.process(template.getId().toString(), context));
+          instruction.getMediaType(), templateEngine.process(templateId.toString(), context));
     } catch (JsonProcessingException e) {
-      log.error("Failed to process template {}", template.getId(), e);
-      throw new RuntimeException("Failed to process template " + template.getId(), e);
+      log.error("Failed to process template {}", templateId, e);
+      throw new RuntimeException("Failed to process template " + templateId, e);
     }
+  }
+
+  private Instruction findInstruction(TemplateContext templateContext) {
+    return instructions.stream()
+        .filter(i -> templateContext.getTemplateId().equals(i.getId()))
+        .findAny()
+        .orElseThrow(() -> new NotFoundException("template", templateContext.getTemplateId()));
   }
 }

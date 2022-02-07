@@ -15,16 +15,25 @@
 */
 package ch.silviowangler.oms;
 
-import ch.onstructive.mapping.mapstruct.MicronautMappingConfig;
-import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
-import org.mapstruct.MappingTarget;
+import io.micronaut.http.MediaType;
+import java.util.UUID;
 
-@Mapper(config = MicronautMappingConfig.class)
-public interface TemplateMapper {
+public interface Instruction {
 
-  TemplateDto toTemplateDto(Template template);
+  /**
+   * Declare the binding variable that is going to be used in the template.
+   *
+   * @return the binding variable. by default this is variable is called 'document'.
+   */
+  default String getBindingVariableName() {
+    return "document";
+  }
 
-  @Mapping(target = "id", ignore = true)
-  void toTemplate(TemplateDto templateDto, @MappingTarget Template template);
+  default MediaType getMediaType() {
+    return MediaType.APPLICATION_PDF_TYPE;
+  }
+
+  Class<Object> getBindingClass();
+
+  UUID getId();
 }

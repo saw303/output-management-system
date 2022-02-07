@@ -1,0 +1,1 @@
+Hello [(${document.name})], date of birth: [(${document.dob})]\nLang: [(${#locale.language})]

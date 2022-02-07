@@ -15,17 +15,47 @@
 */
 package ch.silviowangler.oms;
 
+import static ch.onstructive.util.Assertions.requireNonEmpty;
+
 import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
+import io.micronaut.context.annotation.Value;
+import java.util.Set;
 import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
+import org.thymeleaf.templateresolver.ITemplateResolver;
 
+/** @author Silvio Wangler (silvio.wangler@onstructive.ch) */
 @Factory
 public class TemplateBeanFactory {
 
   @Bean
-  public TemplateEngine templateEngine(DefaultDatabaseTemplateResolver templateResolver) {
+  public TemplateEngine templateEngine(Set<ITemplateResolver> templateResolvers) {
     TemplateEngine templateEngine = new TemplateEngine();
-    templateEngine.setTemplateResolver(templateResolver);
+    templateEngine.setTemplateResolvers(requireNonEmpty(templateResolvers, "templateResolvers"));
     return templateEngine;
+  }
+
+  /**
+   * Build the default template resolver which uses tries to find the templates on the classpath.
+   * This resolver has the order of 10 in order that other custom resolvers can replace this one.
+   *
+   * <p>The default template should follow this patter <code>oms-[template-id].template</code>. The
+   * prefix and suffix can be overridden in the configuration.
+   *
+   * @param prefix define the prefix.
+   * @param suffix define the suffix.
+   * @return a template resolver that searches for templates on the classpath.
+   */
+  @Bean
+  public ClassLoaderTemplateResolver templateResolver(
+      @Value("${oms.prefix:oms-}") String prefix, @Value("${oms.suffix:.template}") String suffix) {
+    ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
+    templateResolver.setPrefix(prefix);
+    templateResolver.setSuffix(suffix);
+
+    // make sure this resolver has a low priority
+    templateResolver.setOrder(10);
+    return templateResolver;
   }
 }

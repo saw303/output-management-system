@@ -21,8 +21,10 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.Comparator;
+import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import lombok.extern.slf4j.Slf4j;
 
@@ -69,7 +71,7 @@ public class DefaultLibreOfficePdfProducer implements PdfProducer {
     final String[] args =
         getPlatformSpecificProcessStartArguments(
             operatingSystem, exec, libreOfficeInstallationDirectory, fileIn, fileOut);
-    log.debug("About to use Libre Office args {}", Stream.of(args).collect(Collectors.toList()));
+    log.debug("About to use Libre Office args {}", List.of(args));
 
     ProcessBuilder processBuilder = new ProcessBuilder(args);
     processBuilder.redirectErrorStream(true);
@@ -78,41 +80,35 @@ public class DefaultLibreOfficePdfProducer implements PdfProducer {
     BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
     p.waitFor();
 
-    String line;
-    while ((line = reader.readLine()) != null) {
-      log.debug("Process output: '{}'", line);
+    if (log.isDebugEnabled()) {
+      String line;
+      while ((line = reader.readLine()) != null) {
+        log.debug("Process output: '{}'", line);
+      }
     }
 
     log.info("Process exited with code {}", p.exitValue());
 
-    libreOfficeInstallationDirectory.delete();
+    try (Stream<Path> walk = Files.walk(libreOfficeInstallationDirectory.toPath())) {
+      walk.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);
+    }
+
+    if (libreOfficeInstallationDirectory.exists()) {
+      log.warn(
+          "Unable to delete Libre Office installation directory {}",
+          libreOfficeInstallationDirectory.getAbsolutePath());
+    }
 
     byte[] pdf = Files.readAllBytes(fileOut.toPath());
+
     log.debug("Deleting files: '{}' and '{}'", fileIn.getPath(), fileOut.getPath());
 
-    boolean didDeleteFileIn = fileIn.delete();
-    boolean didDeleteFileOut = fileOut.delete();
-
-    if (!didDeleteFileIn) {
-      log.error("Unable to delete file '{}'", fileIn.getPath());
-    }
-
-    if (!didDeleteFileOut) {
-      log.error("Unable to delete file '{}'", fileOut.getPath());
-    }
+    Files.deleteIfExists(fileIn.toPath());
+    Files.deleteIfExists(fileOut.toPath());
     return pdf;
   }
 
-  /**
-   * Creates a command link according to https://stackoverflow.com/a/67870597/960875
-   *
-   * @param operatingSystem
-   * @param exec
-   * @param libreOfficeInstallationPath
-   * @param fileIn
-   * @param fileOut
-   * @return
-   */
+  /** Creates a command link according to https://stackoverflow.com/a/67870597/960875 */
   private String[] getPlatformSpecificProcessStartArguments(
       final String operatingSystem,
       final String exec,
@@ -143,11 +139,11 @@ public class DefaultLibreOfficePdfProducer implements PdfProducer {
     throw new IllegalArgumentException(OS_MSG);
   }
 
-  private File createUniqueLibreOfficeInstallationDirectory() {
+  private File createUniqueLibreOfficeInstallationDirectory() throws IOException {
     File libreOfficeInstallation =
         new File(System.getProperty("java.io.tmpdir"), UUID.randomUUID().toString());
 
-    libreOfficeInstallation.mkdir();
+    Files.createDirectory(libreOfficeInstallation.toPath());
     return libreOfficeInstallation;
   }
 }

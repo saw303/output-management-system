@@ -16,7 +16,6 @@
 package ch.silviowangler.oms;
 
 import static io.micronaut.http.MediaType.APPLICATION_PDF;
-import static io.micronaut.http.MediaType.TEXT_PLAIN;
 
 import io.micronaut.http.HttpResponse;
 import io.micronaut.http.MediaType;
@@ -37,8 +36,8 @@ public class OmsControllerV1 {
 
   private final TemplateService templateService;
 
-  @Post("/{templateId}/process")
-  @Produces(value = {APPLICATION_PDF, TEXT_PLAIN})
+  @Post("/{templateId}")
+  @Produces(value = {MediaType.ALL})
   @ExecuteOn(TaskExecutors.SCHEDULED)
   public HttpResponse renderTemplate(
       UUID templateId,

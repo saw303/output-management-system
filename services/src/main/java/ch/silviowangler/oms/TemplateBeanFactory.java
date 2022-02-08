@@ -22,6 +22,7 @@ import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Value;
 import java.util.Set;
 import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.templateresolver.ITemplateResolver;
 
@@ -48,14 +49,15 @@ public class TemplateBeanFactory {
    * @return a template resolver that searches for templates on the classpath.
    */
   @Bean
-  public ClassLoaderTemplateResolver templateResolver(
-      @Value("${oms.prefix:oms-}") String prefix, @Value("${oms.suffix:.template}") String suffix) {
+  public ClassLoaderTemplateResolver libreOfficeTemplateResolver(
+      @Value("${oms.prefix:oms-}") String prefix, @Value("${oms.suffix:.fodt}") String suffix) {
     ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
     templateResolver.setPrefix(prefix);
     templateResolver.setSuffix(suffix);
 
     // make sure this resolver has a low priority
     templateResolver.setOrder(10);
+    templateResolver.setTemplateMode(TemplateMode.XML);
     return templateResolver;
   }
 }

@@ -13,27 +13,27 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package ch.silviowangler.oms;
+package ch.silviowangler.oms.instructions.billing;
 
+import ch.silviowangler.oms.Instruction;
 import io.micronaut.http.MediaType;
+import jakarta.inject.Singleton;
 import java.util.UUID;
 
-public interface Instruction {
-
-  /**
-   * Declare the binding variable that is going to be used in the template.
-   *
-   * @return the binding variable. by default this is variable is called 'document'.
-   */
-  default String getBindingVariableName() {
-    return "document";
+@Singleton
+public class OnstructiveBillInstruction implements Instruction {
+  @Override
+  public Class<?> getBindingClass() {
+    return Billing.class;
   }
 
-  default MediaType getMediaType() {
-    return MediaType.APPLICATION_PDF_TYPE;
+  @Override
+  public MediaType getMediaType() {
+    return MediaType.of("application/vnd.oasis.opendocument.text");
   }
 
-  Class<?> getBindingClass();
-
-  UUID getId();
+  @Override
+  public UUID getId() {
+    return UUID.fromString("39906837-7af4-4330-84df-e3a8b329e4d5");
+  }
 }

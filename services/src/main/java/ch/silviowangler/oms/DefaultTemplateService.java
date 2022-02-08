@@ -22,6 +22,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.inject.Singleton;
 import java.util.Collection;
+import java.util.Objects;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.thymeleaf.TemplateEngine;
@@ -48,6 +49,16 @@ public class DefaultTemplateService implements TemplateService {
   public ProcessResult process(TemplateContext templateContext) {
 
     Instruction instruction = findInstruction(templateContext);
+
+    if (!Objects.equals(templateContext.getRequestedOutput(), instruction.getMediaType())) {
+      log.error(
+          "Template {} is requested for {} but can only {}",
+          templateContext.getTemplateId(),
+          templateContext.getRequestedOutput(),
+          instruction.getMediaType());
+      throw new RuntimeException("Template only supports media type " + instruction.getMediaType());
+    }
+
     Context context = new Context(templateContext.getLocale());
 
     UUID templateId = templateContext.getTemplateId();

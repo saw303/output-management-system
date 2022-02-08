@@ -15,7 +15,7 @@ import static io.micronaut.http.MediaType.TEXT_PLAIN
 @Client("/api/v1/templates")
 interface TemplateClient {
 
-    @Post("/{id}/process")
+    @Post("/{id}")
     @Consumes(value = [APPLICATION_PDF, TEXT_PLAIN])
     HttpResponse<?> process(UUID id, @Header Locale acceptLanguage, @Header MediaType accept, @Body String body)
 }

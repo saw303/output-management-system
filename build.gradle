@@ -37,6 +37,7 @@ subprojects { subproject ->
 
         implementation "ch.onstructive.commons:onstructive-commons-java-commons:${onstructiveCommons}"
         implementation "ch.onstructive.commons:onstructive-commons-micronaut-commons:${onstructiveCommons}"
+        implementation "ch.onstructive.commons:onstructive-commons-micronaut-jackson-commons:${onstructiveCommons}"
     }
 
     java {

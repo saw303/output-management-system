@@ -20,7 +20,9 @@ import static ch.onstructive.util.Assertions.requireNonEmpty;
 import ch.onstructive.exceptions.NotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.micronaut.http.MediaType;
 import jakarta.inject.Singleton;
+import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.UUID;
@@ -36,13 +38,17 @@ public class DefaultTemplateService implements TemplateService {
   private final TemplateEngine templateEngine;
   private final Collection<Instruction> instructions;
 
+  private final PdfProducer pdfProducer;
+
   public DefaultTemplateService(
       ObjectMapper objectMapper,
       TemplateEngine templateEngine,
-      Collection<Instruction> instructions) {
+      Collection<Instruction> instructions,
+      PdfProducer pdfProducer) {
     this.objectMapper = objectMapper;
     this.templateEngine = templateEngine;
     this.instructions = requireNonEmpty(instructions, "instructions");
+    this.pdfProducer = pdfProducer;
   }
 
   @Override
@@ -50,13 +56,14 @@ public class DefaultTemplateService implements TemplateService {
 
     Instruction instruction = findInstruction(templateContext);
 
-    if (!Objects.equals(templateContext.getRequestedOutput(), instruction.getMediaType())) {
+    if (!instruction.getSupportedMediaTypes().contains(templateContext.getRequestedOutput())) {
       log.error(
           "Template {} is requested for {} but can only {}",
           templateContext.getTemplateId(),
           templateContext.getRequestedOutput(),
-          instruction.getMediaType());
-      throw new RuntimeException("Template only supports media type " + instruction.getMediaType());
+          instruction.getSupportedMediaTypes());
+      throw new UnsupportedMediaTypeException(
+          templateContext.getRequestedOutput(), instruction.getSupportedMediaTypes());
     }
 
     Context context = new Context(templateContext.getLocale());
@@ -66,8 +73,15 @@ public class DefaultTemplateService implements TemplateService {
       Object bindingObject =
           objectMapper.readValue(templateContext.getJsonAsString(), instruction.getBindingClass());
       context.setVariable(instruction.getBindingVariableName(), bindingObject);
+      String writerXml = templateEngine.process(templateId.toString(), context);
+
+      if (Objects.equals(templateContext.getRequestedOutput(), MediaType.APPLICATION_PDF_TYPE)) {
+        return new ProcessResult(
+            templateContext.getRequestedOutput(), pdfProducer.producePdf(writerXml));
+      }
       return new ProcessResult(
-          instruction.getMediaType(), templateEngine.process(templateId.toString(), context));
+          templateContext.getRequestedOutput(), writerXml.getBytes(StandardCharsets.UTF_8));
+
     } catch (JsonProcessingException e) {
       log.error("Failed to process template {}", templateId, e);
       throw new RuntimeException("Failed to process template " + templateId, e);

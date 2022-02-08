@@ -22,5 +22,5 @@ import lombok.Value;
 public class ProcessResult {
 
   private final MediaType mediaType;
-  private final String content;
+  private final byte[] content;
 }

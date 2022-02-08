@@ -15,26 +15,6 @@
 */
 package ch.silviowangler.oms;
 
-import io.micronaut.http.MediaType;
-import java.util.Set;
-import java.util.UUID;
-
-public interface Instruction {
-
-  /**
-   * Declare the binding variable that is going to be used in the template.
-   *
-   * @return the binding variable. by default this is variable is called 'document'.
-   */
-  default String getBindingVariableName() {
-    return "document";
-  }
-
-  default Set<MediaType> getSupportedMediaTypes() {
-    return Set.of(MediaType.APPLICATION_PDF_TYPE);
-  }
-
-  Class<?> getBindingClass();
-
-  UUID getId();
+public interface PdfProducer {
+  byte[] producePdf(String writerXml);
 }

@@ -10,24 +10,24 @@ import java.time.LocalDate
 @Singleton
 class HelloInstruction implements Instruction {
 
-    @Override
-    MediaType getMediaType() {
-        return MediaType.TEXT_PLAIN_TYPE
-    }
+  @Override
+  Set<MediaType> getSupportedMediaTypes() {
+    return [MediaType.TEXT_PLAIN_TYPE] as Set
+  }
 
-    @Override
-    Class getBindingClass() {
-        return MyBinding
-    }
+  @Override
+  Class getBindingClass() {
+    return MyBinding
+  }
 
-    @Override
-    UUID getId() {
-        return UUID.fromString('9b8af32f-0538-4f8f-b19e-a5deb5e23d0a')
-    }
+  @Override
+  UUID getId() {
+    return UUID.fromString('9b8af32f-0538-4f8f-b19e-a5deb5e23d0a')
+  }
 
-    @Canonical
-    static class MyBinding {
-        String name
-        LocalDate dob
-    }
+  @Canonical
+  static class MyBinding {
+    String name
+    LocalDate dob
+  }
 }

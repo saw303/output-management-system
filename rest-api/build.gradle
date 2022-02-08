@@ -1,3 +1,4 @@
 dependencies {
-    implementation project(":${rootProject.name}-services-api")
+  implementation("io.micronaut:micronaut-http-server")
+  implementation project(":${rootProject.name}-services-api")
 }

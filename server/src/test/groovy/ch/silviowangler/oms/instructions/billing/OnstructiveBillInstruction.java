@@ -15,21 +15,28 @@
 */
 package ch.silviowangler.oms.instructions.billing;
 
+import static io.micronaut.http.MediaType.APPLICATION_PDF_TYPE;
+
 import ch.silviowangler.oms.Instruction;
 import io.micronaut.http.MediaType;
 import jakarta.inject.Singleton;
+import java.util.Set;
 import java.util.UUID;
 
 @Singleton
 public class OnstructiveBillInstruction implements Instruction {
+
+  private static final Set<MediaType> SUPPORTED_TYPES =
+      Set.of(MediaType.of("application/vnd.oasis.opendocument.text"), APPLICATION_PDF_TYPE);
+
   @Override
   public Class<?> getBindingClass() {
     return Billing.class;
   }
 
   @Override
-  public MediaType getMediaType() {
-    return MediaType.of("application/vnd.oasis.opendocument.text");
+  public Set<MediaType> getSupportedMediaTypes() {
+    return SUPPORTED_TYPES;
   }
 
   @Override

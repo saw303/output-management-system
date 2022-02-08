@@ -17,24 +17,30 @@ package ch.silviowangler.oms;
 
 import io.micronaut.http.MediaType;
 import java.util.Set;
-import java.util.UUID;
+import java.util.stream.Collectors;
 
-public interface Instruction {
+public class UnsupportedMediaTypeException extends RuntimeException {
 
-  /**
-   * Declare the binding variable that is going to be used in the template.
-   *
-   * @return the binding variable. by default this is variable is called 'document'.
-   */
-  default String getBindingVariableName() {
-    return "document";
+  private final MediaType wanted;
+  private final Set<MediaType> needed;
+
+  public UnsupportedMediaTypeException(MediaType wanted, MediaType needed) {
+    this(wanted, Set.of(needed));
   }
 
-  default Set<MediaType> getSupportedMediaTypes() {
-    return Set.of(MediaType.APPLICATION_PDF_TYPE);
+  public UnsupportedMediaTypeException(MediaType wanted, Set<MediaType> needed) {
+    super(
+        "Template only supports media type "
+            + needed.stream().map(MediaType::getName).collect(Collectors.joining()));
+    this.wanted = wanted;
+    this.needed = needed;
   }
 
-  Class<?> getBindingClass();
+  public MediaType getWanted() {
+    return wanted;
+  }
 
-  UUID getId();
+  public Set<MediaType> getNeeded() {
+    return needed;
+  }
 }

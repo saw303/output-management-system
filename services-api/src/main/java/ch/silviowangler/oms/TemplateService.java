@@ -17,5 +17,5 @@ package ch.silviowangler.oms;
 
 public interface TemplateService {
 
-  ProcessResult process(TemplateContext templateContext);
+  ProcessResult process(TemplateContext templateContext) throws UnsupportedMediaTypeException;
 }

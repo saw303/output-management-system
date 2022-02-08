@@ -17,9 +17,12 @@ package ch.silviowangler.oms.instructions.billing;
 
 import java.time.LocalDate;
 import java.time.Period;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import javax.money.MonetaryAmount;
+import org.javamoney.moneta.Money;
 
 public class Billing {
 
@@ -89,6 +92,20 @@ public class Billing {
 
   public void setEsrBase64(String esrBase64) {
     this.esrBase64 = esrBase64;
+  }
+
+  public MonetaryAmount grandTotal() {
+    return getInvoiceLines().stream()
+        .map(InvoiceLine::getAmount)
+        .reduce(Money.of(0, "CHF"), MonetaryAmount::add);
+  }
+
+  public LocalDate paymentDeadline() {
+    return getInvoiceDate().plusDays(getPaymentUntil().getDays());
+  }
+
+  public String paymentDeadlineFormatted(Locale locale) {
+    return DateTimeFormatter.ofPattern("dd.MM.y", locale).format(paymentDeadline());
   }
 
   public static class Customer {

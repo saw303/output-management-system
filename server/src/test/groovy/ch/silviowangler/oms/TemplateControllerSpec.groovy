@@ -131,7 +131,7 @@ class TemplateControllerSpec extends Specification {
     String json = objectMapper.writeValueAsString(billing)
 
     when:
-    HttpResponse response = templateClient.process(invoiceTemplateId, GERMAN, MICROSOFT_EXCEL_OPEN_XML_TYPE, json)
+    templateClient.process(invoiceTemplateId, GERMAN, MICROSOFT_EXCEL_OPEN_XML_TYPE, json)
 
     then:
     HttpClientResponseException ex = thrown(HttpClientResponseException)

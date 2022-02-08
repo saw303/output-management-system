@@ -10,6 +10,8 @@ dependencies {
 
     implementation("jakarta.annotation:jakarta.annotation-api")
     runtimeOnly("ch.qos.logback:logback-classic")
+
+    testImplementation "net.codecrete.qrbill:qrbill-generator:3.0.0"
 }
 
 application {

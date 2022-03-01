@@ -59,19 +59,25 @@ public class DefaultLibreOfficePdfProducer implements PdfProducer {
 
     Files.write(fileIn.toPath(), content.getBytes());
 
+    log.info(
+        "Converting {} to {} (directory: {}",
+        fileIn.getName(),
+        fileOut.getName(),
+        fileOut.getParentFile().getAbsolutePath());
+
     final String operatingSystem = System.getProperty("os.name", OS_NAME_LINUX).toLowerCase();
     final String exec = getPlatformSpecificExecutable(operatingSystem);
-    log.debug("Libreoffice executable program '{}' is used", exec);
+    log.trace("Libreoffice executable program '{}' is used", exec);
 
     File libreOfficeInstallationDirectory = createUniqueLibreOfficeInstallationDirectory();
-    log.debug(
+    log.trace(
         "Created libreoffice installation directory {}",
         libreOfficeInstallationDirectory.getAbsolutePath());
 
     final String[] args =
         getPlatformSpecificProcessStartArguments(
             operatingSystem, exec, libreOfficeInstallationDirectory, fileIn, fileOut);
-    log.debug("About to use Libre Office args {}", List.of(args));
+    log.trace("About to use Libre Office args {}", List.of(args));
 
     ProcessBuilder processBuilder = new ProcessBuilder(args);
     processBuilder.redirectErrorStream(true);
@@ -80,13 +86,12 @@ public class DefaultLibreOfficePdfProducer implements PdfProducer {
     BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
     p.waitFor();
 
-    if (log.isDebugEnabled()) {
+    if (log.isInfoEnabled()) {
       String line;
       while ((line = reader.readLine()) != null) {
-        log.debug("Process output: '{}'", line);
+        log.info("Process output: '{}'", line);
       }
     }
-
     log.info("Process exited with code {}", p.exitValue());
 
     try (Stream<Path> walk = Files.walk(libreOfficeInstallationDirectory.toPath())) {

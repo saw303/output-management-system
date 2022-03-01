@@ -11,11 +11,10 @@ import spock.lang.Specification
 
 import java.nio.file.Files
 import java.nio.file.Path
-import java.nio.file.Paths
 
 class EBillSpec extends Specification{
 
-  void "Hello"() {
+  void "Create an E-Bill"() {
 
     given:
     // Setup bill
@@ -56,11 +55,7 @@ class EBillSpec extends Specification{
     byte[] svg = QRBill.generate(bill)
 
     and:
-    Path path = Paths.get("/Users/saw/dev/private/oms/hello.pdf")
-
-    if (Files.exists(path)) {
-      Files.delete(path)
-    }
+    Path path = File.createTempFile("hello", ".pdf").toPath()
     Files.write(path, svg)
 
     then:

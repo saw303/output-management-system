@@ -1,65 +1,78 @@
 plugins {
-    id "com.github.johnrengelman.shadow" version "7.1.2" apply false
-    id "io.micronaut.application" version "$micronautGradlePluginVersion" apply false
-    id "io.micronaut.library" version "$micronautGradlePluginVersion" apply false
-    id 'gesus.release' version "${gradlePluginVersion}" apply false
-    id "com.diffplug.spotless" version "6.2.1" apply false
+  id "com.github.johnrengelman.shadow" version "7.1.2" apply false
+  id "io.micronaut.application" version "$micronautGradlePluginVersion" apply false
+  id "io.micronaut.library" version "$micronautGradlePluginVersion" apply false
+  id 'gesus.release' version "${gradlePluginVersion}" apply false
+  id "com.diffplug.spotless" version "6.2.1" apply false
 }
 
 subprojects { subproject ->
 
-    apply plugin: 'gesus.release'
-    apply plugin: 'com.diffplug.spotless'
+  apply plugin: 'gesus.release'
+  apply plugin: 'com.diffplug.spotless'
 
-    group = "ch.silviowangler.oms"
+  group = "ch.silviowangler.oms"
 
-    if (subproject.name == "${rootProject.name}-server") {
-        apply plugin: 'io.micronaut.application'
-    } else {
-        apply plugin: 'io.micronaut.library'
+  if (subproject.name == "${rootProject.name}-server") {
+    apply plugin: 'io.micronaut.application'
+  } else {
+    apply plugin: 'io.micronaut.library'
+  }
+
+  dependencies {
+
+    annotationProcessor("org.projectlombok:lombok")
+    annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
+    annotationProcessor("io.micronaut:micronaut-http-validation")
+    implementation("io.micronaut:micronaut-http-client")
+    implementation("io.micronaut:micronaut-jackson-databind")
+    implementation("io.micronaut:micronaut-runtime")
+
+    compileOnly("org.projectlombok:lombok")
+
+    implementation("io.micronaut:micronaut-validation")
+    compileOnly("javax.inject:javax.inject:1")
+
+    implementation "org.mapstruct:mapstruct:${mapstructVersion}"
+
+    implementation "ch.onstructive.commons:onstructive-commons-java-commons:${onstructiveCommons}"
+    implementation "ch.onstructive.commons:onstructive-commons-micronaut-commons:${onstructiveCommons}"
+    implementation "ch.onstructive.commons:onstructive-commons-micronaut-jackson-commons:${onstructiveCommons}"
+  }
+
+  java {
+    sourceCompatibility = JavaVersion.toVersion("17")
+    targetCompatibility = JavaVersion.toVersion("17")
+  }
+  micronaut {
+    runtime("netty")
+    testRuntime("spock2")
+    processing {
+      incremental(true)
+      annotations("ch.silviowangler.oms.*")
     }
-
-    dependencies {
-
-        annotationProcessor("org.projectlombok:lombok")
-        annotationProcessor "org.mapstruct:mapstruct-processor:${mapstructVersion}"
-        annotationProcessor("io.micronaut:micronaut-http-validation")
-        implementation("io.micronaut:micronaut-http-client")
-        implementation("io.micronaut:micronaut-jackson-databind")
-        implementation("io.micronaut:micronaut-runtime")
-
-        compileOnly("org.projectlombok:lombok")
-
-        implementation("io.micronaut:micronaut-validation")
-        compileOnly("javax.inject:javax.inject:1")
-
-        implementation "org.mapstruct:mapstruct:${mapstructVersion}"
-
-        implementation "ch.onstructive.commons:onstructive-commons-java-commons:${onstructiveCommons}"
-        implementation "ch.onstructive.commons:onstructive-commons-micronaut-commons:${onstructiveCommons}"
-        implementation "ch.onstructive.commons:onstructive-commons-micronaut-jackson-commons:${onstructiveCommons}"
-    }
-
+  }
+  spotless {
     java {
-        sourceCompatibility = JavaVersion.toVersion("17")
-        targetCompatibility = JavaVersion.toVersion("17")
-    }
-    micronaut {
-        runtime("netty")
-        testRuntime("spock2")
-        processing {
-            incremental(true)
-            annotations("ch.silviowangler.oms.*")
-        }
-    }
-    spotless {
-        java {
-            importOrder('java', 'javax', 'ch.silviowangler', '', '\\#com.acme', '\\#')
-            removeUnusedImports()
+      importOrder('java', 'javax', 'ch.silviowangler', '', '\\#com.acme', '\\#')
+      removeUnusedImports()
 
-            googleJavaFormat()
+      googleJavaFormat()
 
-            licenseHeaderFile "${rootProject.projectDir}/license.txt"
-        }
+      licenseHeaderFile "${rootProject.projectDir}/license.txt"
     }
+  }
+
+  publishing {
+    repositories {
+      maven {
+        name = "GitHubPackages"
+        url = "https://maven.pkg.github.com/saw303/output-management-system"
+        credentials {
+          username = System.getenv("USERNAME")
+          password = System.getenv("TOKEN")
+        }
+      }
+    }
+  }
 }

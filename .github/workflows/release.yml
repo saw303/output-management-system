@@ -16,6 +16,8 @@ jobs:
     env:
       M2_USER: ${{ secrets.M2_USER }}
       M2_PWD: ${{ secrets.M2_PWD }}
+      GESUS_ARTIFACTORY_USER: ${{ secrets.M2_USER }}
+      GESUS_ARTIFACTORY_PASS: ${{ secrets.M2_PWD }}
 
     steps:
     - uses: actions/checkout@v2
@@ -26,6 +28,14 @@ jobs:
         distribution: 'temurin'
         server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
         settings-path: ${{ github.workspace }} # location for the settings.xml file
+
+    - name: Prepare
+      id: prepare
+      run: |
+        git config --local user.name "GitHub Actions"
+        git config --local user.email "gh-actions@wangler.io"
+        git fetch --tags
+        git tag
 
     - name: Build with Gradle
       uses: gradle/gradle-build-action@v2
@@ -39,3 +49,10 @@ jobs:
       env:
         USERNAME: ${{ github.actor }}
         TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Publish tag
+      uses: ad-m/github-push-action@master
+      with:
+        tags: true
+        branch: ${{ env.BRANCH_NAME }}
+        github_token: ${{ secrets.GITHUB_TOKEN }}

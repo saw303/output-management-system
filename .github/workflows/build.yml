@@ -28,6 +28,12 @@ jobs:
         server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
         settings-path: ${{ github.workspace }} # location for the settings.xml file
 
+    - name: Prepare
+      id: prepare
+      run: |
+        git fetch --tags
+        sudo apt install -y libreoffice-writer
+
     - name: Build with Gradle
       uses: gradle/gradle-build-action@v2
       with:

@@ -21,18 +21,35 @@ import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
 import io.micronaut.context.annotation.Value;
 import java.util.Set;
+import lombok.extern.slf4j.Slf4j;
 import org.thymeleaf.TemplateEngine;
+import org.thymeleaf.dialect.IDialect;
+import org.thymeleaf.extras.java8time.dialect.Java8TimeDialect;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.templateresolver.ITemplateResolver;
 
 /** @author Silvio Wangler (silvio.wangler@onstructive.ch) */
 @Factory
+@Slf4j
 public class TemplateBeanFactory {
 
   @Bean
-  public TemplateEngine templateEngine(Set<ITemplateResolver> templateResolvers) {
+  public TemplateEngine templateEngine(
+      Set<ITemplateResolver> templateResolvers, Set<IDialect> dialects) {
     TemplateEngine templateEngine = new TemplateEngine();
+    templateEngine.addDialect(new Java8TimeDialect());
+
+    if (dialects != null) {
+      for (IDialect dialect : dialects) {
+        log.debug(
+            "Applying Thymeleaf dialect '{}' (class: '{}')",
+            dialect.getName(),
+            dialect.getClass().getCanonicalName());
+        templateEngine.addDialect(dialect);
+      }
+    }
+
     templateEngine.setTemplateResolvers(requireNonEmpty(templateResolvers, "templateResolvers"));
     return templateEngine;
   }

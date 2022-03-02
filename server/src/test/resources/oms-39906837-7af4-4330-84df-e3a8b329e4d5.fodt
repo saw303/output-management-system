@@ -653,7 +653,7 @@
     </table:table-row>
    </table:table>
    <text:p text:style-name="Standard"/>
-   <text:p text:style-name="Standard">Zahlbar innert <text:span th:text="${document.paymentUntil.days}">77</text:span> Tagen ab Rechnungsdatum, bis spätestens <text:span th:text="${document.paymentDeadlineFormatted(#locale)}">. November 2025</text:span>.</text:p>
+   <text:p text:style-name="Standard">Zahlbar innert <text:span th:text="${document.paymentUntil.days}">77</text:span> Tagen ab Rechnungsdatum, bis spätestens <text:span th:text="${#temporals.format(document.paymentDeadline, 'dd.MM.yyyy')}">. November 2025</text:span>.</text:p>
    <text:p text:style-name="Standard"/>
    <text:p text:style-name="Standard"/>
    <text:p text:style-name="Standard"/>

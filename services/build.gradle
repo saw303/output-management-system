@@ -1,4 +1,5 @@
 dependencies {
     api project(":${rootProject.name}-services-api")
     implementation 'org.thymeleaf:thymeleaf:3.0.14.RELEASE'
+    implementation 'org.thymeleaf.extras:thymeleaf-extras-java8time:3.0.4.RELEASE'
 }

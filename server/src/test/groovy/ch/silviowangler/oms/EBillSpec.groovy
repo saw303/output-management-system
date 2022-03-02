@@ -16,47 +16,45 @@ class EBillSpec extends Specification{
 
   void "Create an E-Bill"() {
 
-    given:
-    // Setup bill
+    given: 'Setup bill'
     Bill bill = new Bill();
-    bill.setAccount("CH9700700114803110326");
-    bill.setAmount(1077.0 as BigDecimal);
+    bill.setAccount("CH16 8080 8001 5747 8783 2");
+    bill.setAmount(60 as BigDecimal);
     bill.setCurrency("CHF");
 
-    // Set creditor
+    and: 'Set creditor'
     Address creditor = new Address();
-    creditor.setName("onstructive GmbH");
-    creditor.setAddressLine1("Josefstrasse 92");
-    creditor.setAddressLine2("8005 Zürich");
+    creditor.setName("ZSC Supporter");
+    creditor.setAddressLine1("8050 Zürich");
+    creditor.setAddressLine2("-");
     creditor.setCountryCode("CH");
     bill.setCreditor(creditor);
 
-    // more bill data
-    //bill.setReference("202203");
-    bill.setUnstructuredMessage("Rechnung 202203");
+    and: 'more bill data'
+    bill.setUnstructuredMessage("Rechnung T-1234");
 
-    // Set debtor
+    and: 'Set debtor'
     Address debtor = new Address();
-    debtor.setName("ZHAW Gesundheit, Institut für Pflege, Frau Irène Ris");
-    debtor.setStreet("Technikumstrasse")
-    debtor.setHouseNo("71")
-    debtor.setPostalCode("8401")
-    debtor.setTown("Winterthur")
+    debtor.setName("Juan Carlo Sperber");
+    debtor.setStreet("Chüngstrasse")
+    debtor.setHouseNo("12")
+    debtor.setPostalCode("8424")
+    debtor.setTown("Embrach")
     debtor.setCountryCode("CH");
     bill.setDebtor(debtor);
 
-    // Set output format
+    and: 'Set output format'
     BillFormat format = bill.getFormat();
-    format.setGraphicsFormat(GraphicsFormat.PDF);
+    format.setGraphicsFormat(GraphicsFormat.PNG);
     format.setOutputSize(OutputSize.QR_BILL_ONLY);
     format.setLanguage(Language.DE);
 
-    when:
-    byte[] svg = QRBill.generate(bill)
+    when: 'creating the Swiss QR-Code'
+    byte[] qrCodeImage = QRBill.generate(bill)
 
     and:
-    Path path = File.createTempFile("hello", ".pdf").toPath()
-    Files.write(path, svg)
+    Path path = File.createTempFile("hello", ".png").toPath()
+    Files.write(path, qrCodeImage)
 
     then:
     noExceptionThrown()

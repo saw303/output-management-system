@@ -60,18 +60,18 @@ public class DefaultLibreOfficePdfProducer implements PdfProducer {
     Files.write(fileIn.toPath(), content.getBytes());
 
     log.info(
-        "Converting {} to {} (directory: {}",
+        "Converting '{}' to '{}' (directory: '{}')",
         fileIn.getName(),
         fileOut.getName(),
         fileOut.getParentFile().getAbsolutePath());
 
     final String operatingSystem = System.getProperty("os.name", OS_NAME_LINUX).toLowerCase();
     final String exec = getPlatformSpecificExecutable(operatingSystem);
-    log.trace("Libreoffice executable program '{}' is used", exec);
+    log.trace("Libre Office executable program '{}' is used", exec);
 
     File libreOfficeInstallationDirectory = createUniqueLibreOfficeInstallationDirectory();
     log.trace(
-        "Created libreoffice installation directory {}",
+        "Created Libre Office installation directory {}",
         libreOfficeInstallationDirectory.getAbsolutePath());
 
     final String[] args =
@@ -80,19 +80,21 @@ public class DefaultLibreOfficePdfProducer implements PdfProducer {
     log.trace("About to use Libre Office args {}", List.of(args));
 
     ProcessBuilder processBuilder = new ProcessBuilder(args);
+    processBuilder.inheritIO();
     processBuilder.redirectErrorStream(true);
     Process p = processBuilder.start();
-
-    BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()));
-    p.waitFor();
+    int exitCode = p.waitFor();
 
     if (log.isInfoEnabled()) {
-      String line;
-      while ((line = reader.readLine()) != null) {
-        log.info("Process output: '{}'", line);
+      try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
+        String line;
+        while ((line = reader.readLine()) != null) {
+          log.info("Process output: '{}'", line);
+        }
       }
     }
-    log.info("Process exited with code {}", p.exitValue());
+
+    log.info("Process exited with code {}", exitCode);
 
     try (Stream<Path> walk = Files.walk(libreOfficeInstallationDirectory.toPath())) {
       walk.sorted(Comparator.reverseOrder()).map(Path::toFile).forEach(File::delete);

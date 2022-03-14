@@ -75,6 +75,7 @@ public class TemplateBeanFactory {
     // make sure this resolver has a low priority
     templateResolver.setOrder(10);
     templateResolver.setTemplateMode(TemplateMode.XML);
+    templateResolver.setCheckExistence(true);
     return templateResolver;
   }
 
@@ -94,6 +95,7 @@ public class TemplateBeanFactory {
     // make sure this resolver has a low priority
     templateResolver.setOrder(11);
     templateResolver.setTemplateMode(TemplateMode.HTML);
+    templateResolver.setCheckExistence(true);
     return templateResolver;
   }
 }

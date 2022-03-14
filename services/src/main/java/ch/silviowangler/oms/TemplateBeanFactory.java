@@ -77,4 +77,23 @@ public class TemplateBeanFactory {
     templateResolver.setTemplateMode(TemplateMode.XML);
     return templateResolver;
   }
+
+  /**
+   * Template resolver for HTML documents.
+   *
+   * @param prefix
+   * @return
+   */
+  @Bean
+  public ClassLoaderTemplateResolver htmlTemplateResolver(
+      @Value("${oms.prefix:oms-}") String prefix) {
+    ClassLoaderTemplateResolver templateResolver = new ClassLoaderTemplateResolver();
+    templateResolver.setPrefix(prefix);
+    templateResolver.setSuffix(".html");
+
+    // make sure this resolver has a low priority
+    templateResolver.setOrder(11);
+    templateResolver.setTemplateMode(TemplateMode.HTML);
+    return templateResolver;
+  }
 }

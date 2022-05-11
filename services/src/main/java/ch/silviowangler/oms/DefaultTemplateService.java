@@ -16,6 +16,7 @@
 package ch.silviowangler.oms;
 
 import static ch.onstructive.util.Assertions.requireNonEmpty;
+import static org.apache.pdfbox.multipdf.PDFMergerUtility.DocumentMergeMode.OPTIMIZE_RESOURCES_MODE;
 
 import ch.onstructive.exceptions.NotFoundException;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -85,12 +86,13 @@ public class DefaultTemplateService implements TemplateService {
         try (ByteArrayOutputStream destStream = new ByteArrayOutputStream()) {
           PDFMergerUtility mergerUtility = new PDFMergerUtility();
           mergerUtility.setDestinationStream(destStream);
+          mergerUtility.setDocumentMergeMode(OPTIMIZE_RESOURCES_MODE);
 
           for (Object b : bindingObjects) {
             byte[] content = process(templateContext, context, instruction, b);
             mergerUtility.addSource(new ByteArrayInputStream(content));
           }
-          mergerUtility.mergeDocuments(MemoryUsageSetting.setupTempFileOnly());
+          mergerUtility.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
           return new ProcessResult(templateContext.getRequestedOutput(), destStream.toByteArray());
         } catch (IOException e) {
           log.error("Unable to process document", e);

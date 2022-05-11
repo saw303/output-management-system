@@ -2,13 +2,13 @@ plugins {
   id "com.github.johnrengelman.shadow" version "7.1.2" apply false
   id "io.micronaut.application" version "$micronautGradlePluginVersion" apply false
   id "io.micronaut.library" version "$micronautGradlePluginVersion" apply false
-  id 'gesus.release' version "${gradlePluginVersion}" apply false
-  id "com.diffplug.spotless" version "6.2.1" apply false
+  id 'ch.onstructive.gradle.release' version "${onstructiveGradlePluginVersion}" apply false
+  id "com.diffplug.spotless" version "6.6.0" apply false
 }
 
 subprojects { subproject ->
 
-  apply plugin: 'gesus.release'
+  apply plugin: 'ch.onstructive.gradle.release'
   apply plugin: 'com.diffplug.spotless'
 
   group = "ch.silviowangler.oms"
@@ -57,7 +57,7 @@ subprojects { subproject ->
       importOrder('java', 'javax', 'ch.silviowangler', '', '\\#com.acme', '\\#')
       removeUnusedImports()
 
-      googleJavaFormat()
+      googleJavaFormat("1.15.0")
 
       licenseHeaderFile "${rootProject.projectDir}/license.txt"
     }

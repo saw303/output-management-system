@@ -17,7 +17,9 @@ package ch.silviowangler.oms;
 
 import io.micronaut.runtime.Micronaut;
 
-/** @author Silvio Wangler (silvio.wangler@onstructive.ch) */
+/**
+ * @author Silvio Wangler (silvio.wangler@onstructive.ch)
+ */
 public class Application {
 
   public static void main(String[] args) {

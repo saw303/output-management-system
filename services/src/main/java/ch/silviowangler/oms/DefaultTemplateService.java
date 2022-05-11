@@ -22,11 +22,16 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.micronaut.http.MediaType;
 import jakarta.inject.Singleton;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.pdfbox.io.MemoryUsageSetting;
+import org.apache.pdfbox.multipdf.PDFMergerUtility;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.context.Context;
 
@@ -72,20 +77,47 @@ public class DefaultTemplateService implements TemplateService {
     try {
       Object bindingObject =
           objectMapper.readValue(templateContext.getJsonAsString(), instruction.getBindingClass());
-      context.setVariable(instruction.getBindingVariableName(), bindingObject);
-      String writerXml = templateEngine.process(templateId.toString(), context);
 
-      if (Objects.equals(templateContext.getRequestedOutput(), MediaType.APPLICATION_PDF_TYPE)) {
-        return new ProcessResult(
-            templateContext.getRequestedOutput(), pdfProducer.producePdf(writerXml));
+      if (bindingObject.getClass().isArray()) {
+
+        Object[] bindingObjects = (Object[]) bindingObject;
+
+        try (ByteArrayOutputStream destStream = new ByteArrayOutputStream()) {
+          PDFMergerUtility mergerUtility = new PDFMergerUtility();
+          mergerUtility.setDestinationStream(destStream);
+
+          for (Object b : bindingObjects) {
+            byte[] content = process(templateContext, context, instruction, b);
+            mergerUtility.addSource(new ByteArrayInputStream(content));
+          }
+          mergerUtility.mergeDocuments(MemoryUsageSetting.setupTempFileOnly());
+          return new ProcessResult(templateContext.getRequestedOutput(), destStream.toByteArray());
+        } catch (IOException e) {
+          log.error("Unable to process document", e);
+          throw new RuntimeException("Failed to process template " + templateId, e);
+        }
+      } else {
+        byte[] content = process(templateContext, context, instruction, bindingObject);
+        return new ProcessResult(templateContext.getRequestedOutput(), content);
       }
-      return new ProcessResult(
-          templateContext.getRequestedOutput(), writerXml.getBytes(StandardCharsets.UTF_8));
-
     } catch (JsonProcessingException e) {
       log.error("Failed to process template {}", templateId, e);
       throw new RuntimeException("Failed to process template " + templateId, e);
     }
+  }
+
+  private byte[] process(
+      TemplateContext templateContext,
+      Context context,
+      Instruction instruction,
+      Object bindingObject) {
+    context.setVariable(instruction.getBindingVariableName(), bindingObject);
+    String writerXml = templateEngine.process(templateContext.getTemplateId().toString(), context);
+
+    if (Objects.equals(templateContext.getRequestedOutput(), MediaType.APPLICATION_PDF_TYPE)) {
+      return pdfProducer.producePdf(writerXml);
+    }
+    return writerXml.getBytes(StandardCharsets.UTF_8);
   }
 
   private Instruction findInstruction(TemplateContext templateContext) {

@@ -29,7 +29,9 @@ import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.templateresolver.ITemplateResolver;
 
-/** @author Silvio Wangler (silvio.wangler@onstructive.ch) */
+/**
+ * @author Silvio Wangler (silvio.wangler@onstructive.ch)
+ */
 @Factory
 @Slf4j
 public class TemplateBeanFactory {

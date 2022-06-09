@@ -16,10 +16,8 @@
 package ch.silviowangler.oms;
 
 import jakarta.inject.Singleton;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
@@ -80,20 +78,8 @@ public class DefaultLibreOfficePdfProducer implements PdfProducer {
     log.trace("About to use Libre Office args {}", List.of(args));
 
     ProcessBuilder processBuilder = new ProcessBuilder(args);
-    processBuilder.inheritIO();
-    processBuilder.redirectErrorStream(true);
     Process p = processBuilder.start();
     int exitCode = p.waitFor();
-
-    if (log.isInfoEnabled()) {
-      try (BufferedReader reader = new BufferedReader(new InputStreamReader(p.getInputStream()))) {
-        String line;
-        while ((line = reader.readLine()) != null) {
-          log.info("Process output: '{}'", line);
-        }
-      }
-    }
-
     log.info("Process exited with code {}", exitCode);
 
     try (Stream<Path> walk = Files.walk(libreOfficeInstallationDirectory.toPath())) {

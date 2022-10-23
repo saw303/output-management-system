@@ -39,23 +39,23 @@ public class DefaultLibreOfficePdfProducer implements PdfProducer {
   private static final String OS_NAME_LINUX = "linux";
 
   @Override
-  public byte[] producePdf(String writerXml) {
+  public byte[] producePdf(byte[] content) {
     try {
-      return buildPdfFile(writerXml, File.createTempFile("oms", ".fodt"));
+      return buildPdfFile(content, File.createTempFile("oms", ".fodt"));
     } catch (IOException | InterruptedException e) {
       log.error("Cannot produce PDF", e);
       throw new RuntimeException(e);
     }
   }
 
-  private byte[] buildPdfFile(String content, File fileIn)
+  private byte[] buildPdfFile(byte[] content, File fileIn)
       throws IOException, InterruptedException {
     File fileOut =
         new File(
             fileIn.getParentFile(),
             String.format("%s.pdf", fileIn.getName().replaceAll("\\.fodt", "")));
 
-    Files.write(fileIn.toPath(), content.getBytes());
+    Files.write(fileIn.toPath(), content);
 
     log.info(
         "Converting '{}' to '{}' (directory: '{}')",

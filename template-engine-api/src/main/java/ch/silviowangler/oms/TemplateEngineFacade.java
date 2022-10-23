@@ -15,9 +15,7 @@
 */
 package ch.silviowangler.oms;
 
-import io.micronaut.http.MediaType;
-import java.util.Locale;
-import java.util.UUID;
+public interface TemplateEngineFacade {
 
-public record TemplateContext(
-    UUID templateId, Locale locale, String jsonAsString, MediaType requestedOutput) {}
+  byte[] process(TemplateContext templateContext, Instruction instruction, Object bindingObject);
+}

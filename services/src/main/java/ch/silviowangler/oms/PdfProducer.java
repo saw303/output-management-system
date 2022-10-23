@@ -16,5 +16,5 @@
 package ch.silviowangler.oms;
 
 public interface PdfProducer {
-  byte[] producePdf(String writerXml);
+  byte[] producePdf(byte[] content);
 }

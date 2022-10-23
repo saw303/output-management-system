@@ -29,6 +29,8 @@ dependencyResolutionManagement {
 
 rootProject.name="oms"
 
+include 'template-engine-api'
+include 'template-engine-thymeleaf'
 include 'server'
 include 'services'
 include 'services-api'

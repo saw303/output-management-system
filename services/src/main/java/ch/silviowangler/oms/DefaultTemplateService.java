@@ -26,33 +26,30 @@ import jakarta.inject.Singleton;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.io.MemoryUsageSetting;
 import org.apache.pdfbox.multipdf.PDFMergerUtility;
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.Context;
 
 @Singleton
 @Slf4j
 public class DefaultTemplateService implements TemplateService {
 
   private final ObjectMapper objectMapper;
-  private final TemplateEngine templateEngine;
+  private final TemplateEngineFacade templateEngineFacade;
   private final Collection<Instruction> instructions;
 
   private final PdfProducer pdfProducer;
 
   public DefaultTemplateService(
       ObjectMapper objectMapper,
-      TemplateEngine templateEngine,
+      TemplateEngineFacade templateEngineFacade,
       Collection<Instruction> instructions,
       PdfProducer pdfProducer) {
     this.objectMapper = objectMapper;
-    this.templateEngine = templateEngine;
+    this.templateEngineFacade = templateEngineFacade;
     this.instructions = requireNonEmpty(instructions, "instructions");
     this.pdfProducer = pdfProducer;
   }
@@ -62,22 +59,20 @@ public class DefaultTemplateService implements TemplateService {
 
     Instruction instruction = findInstruction(templateContext);
 
-    if (!instruction.getSupportedMediaTypes().contains(templateContext.getRequestedOutput())) {
+    if (!instruction.getSupportedMediaTypes().contains(templateContext.requestedOutput())) {
       log.error(
           "Template {} is requested for {} but can only {}",
-          templateContext.getTemplateId(),
-          templateContext.getRequestedOutput(),
+          templateContext.templateId(),
+          templateContext.requestedOutput(),
           instruction.getSupportedMediaTypes());
       throw new UnsupportedMediaTypeException(
-          templateContext.getRequestedOutput(), instruction.getSupportedMediaTypes());
+          templateContext.requestedOutput(), instruction.getSupportedMediaTypes());
     }
 
-    Context context = new Context(templateContext.getLocale());
-
-    UUID templateId = templateContext.getTemplateId();
+    UUID templateId = templateContext.templateId();
     try {
       Object bindingObject =
-          objectMapper.readValue(templateContext.getJsonAsString(), instruction.getBindingClass());
+          objectMapper.readValue(templateContext.jsonAsString(), instruction.getBindingClass());
 
       if (bindingObject.getClass().isArray()) {
 
@@ -89,18 +84,18 @@ public class DefaultTemplateService implements TemplateService {
           mergerUtility.setDocumentMergeMode(OPTIMIZE_RESOURCES_MODE);
 
           for (Object b : bindingObjects) {
-            byte[] content = process(templateContext, context, instruction, b);
+            byte[] content = process(templateContext, instruction, b);
             mergerUtility.addSource(new ByteArrayInputStream(content));
           }
           mergerUtility.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
-          return new ProcessResult(templateContext.getRequestedOutput(), destStream.toByteArray());
+          return new ProcessResult(templateContext.requestedOutput(), destStream.toByteArray());
         } catch (IOException e) {
           log.error("Unable to process document", e);
           throw new RuntimeException("Failed to process template " + templateId, e);
         }
       } else {
-        byte[] content = process(templateContext, context, instruction, bindingObject);
-        return new ProcessResult(templateContext.getRequestedOutput(), content);
+        byte[] content = process(templateContext, instruction, bindingObject);
+        return new ProcessResult(templateContext.requestedOutput(), content);
       }
     } catch (JsonProcessingException e) {
       log.error("Failed to process template {}", templateId, e);
@@ -109,23 +104,20 @@ public class DefaultTemplateService implements TemplateService {
   }
 
   private byte[] process(
-      TemplateContext templateContext,
-      Context context,
-      Instruction instruction,
-      Object bindingObject) {
-    context.setVariable(instruction.getBindingVariableName(), bindingObject);
-    String writerXml = templateEngine.process(templateContext.getTemplateId().toString(), context);
+      TemplateContext templateContext, Instruction instruction, Object bindingObject) {
 
-    if (Objects.equals(templateContext.getRequestedOutput(), MediaType.APPLICATION_PDF_TYPE)) {
-      return pdfProducer.producePdf(writerXml);
+    byte[] content = templateEngineFacade.process(templateContext, instruction, bindingObject);
+
+    if (Objects.equals(templateContext.requestedOutput(), MediaType.APPLICATION_PDF_TYPE)) {
+      return pdfProducer.producePdf(content);
     }
-    return writerXml.getBytes(StandardCharsets.UTF_8);
+    return content;
   }
 
   private Instruction findInstruction(TemplateContext templateContext) {
     return instructions.stream()
-        .filter(i -> templateContext.getTemplateId().equals(i.getId()))
+        .filter(i -> templateContext.templateId().equals(i.getId()))
         .findAny()
-        .orElseThrow(() -> new NotFoundException("template", templateContext.getTemplateId()));
+        .orElseThrow(() -> new NotFoundException("template", templateContext.templateId()));
   }
 }

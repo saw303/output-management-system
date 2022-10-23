@@ -3,17 +3,18 @@ plugins {
   id "io.micronaut.application" version "$micronautGradlePluginVersion" apply false
   id "io.micronaut.library" version "$micronautGradlePluginVersion" apply false
   id 'ch.onstructive.gradle.release' version "${onstructiveGradlePluginVersion}" apply false
-  id "com.diffplug.spotless" version "6.6.0" apply false
+  id 'ch.onstructive.gradle.codestyle' version "${onstructiveGradlePluginVersion}" apply false
+  id 'gg.jte.gradle' version '2.2.2' apply false
 }
 
 subprojects { subproject ->
 
   apply plugin: 'ch.onstructive.gradle.release'
-  apply plugin: 'com.diffplug.spotless'
+  apply plugin: 'ch.onstructive.gradle.codestyle'
 
   group = "ch.silviowangler.oms"
 
-  if (subproject.name == "${rootProject.name}-server") {
+  if (subproject.name == "${rootProject.name}-server" || subproject.name == "${rootProject.name}-tests-jte") {
     apply plugin: 'io.micronaut.application'
   } else {
     apply plugin: 'io.micronaut.library'
@@ -50,16 +51,6 @@ subprojects { subproject ->
     processing {
       incremental(true)
       annotations("ch.silviowangler.oms.*")
-    }
-  }
-  spotless {
-    java {
-      importOrder('java', 'javax', 'ch.silviowangler', '', '\\#com.acme', '\\#')
-      removeUnusedImports()
-
-      googleJavaFormat("1.15.0")
-
-      licenseHeaderFile "${rootProject.projectDir}/license.txt"
     }
   }
 

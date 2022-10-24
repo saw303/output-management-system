@@ -32,7 +32,8 @@ jobs:
       id: prepare
       run: |
         git fetch --tags
-        sudo apt install -y libreoffice-writer
+        sudo apt update
+        sudo apt install -y --no-install-recommends libreoffice-writer
 
     - name: Build with Gradle
       uses: gradle/gradle-build-action@v2

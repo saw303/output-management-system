@@ -24,7 +24,6 @@ import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.dialect.IDialect;
-import org.thymeleaf.extras.java8time.dialect.Java8TimeDialect;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.templateresolver.ITemplateResolver;
@@ -40,7 +39,6 @@ public class TemplateBeanFactory {
   public TemplateEngine templateEngine(
       Set<ITemplateResolver> templateResolvers, Set<IDialect> dialects) {
     TemplateEngine templateEngine = new TemplateEngine();
-    templateEngine.addDialect(new Java8TimeDialect());
 
     if (dialects != null) {
       for (IDialect dialect : dialects) {

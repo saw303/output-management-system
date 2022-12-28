@@ -19,6 +19,7 @@ import static ch.onstructive.util.Assertions.requireNonEmpty;
 
 import io.micronaut.context.annotation.Bean;
 import io.micronaut.context.annotation.Factory;
+import io.micronaut.context.annotation.Requires;
 import io.micronaut.context.annotation.Value;
 import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
@@ -32,8 +33,9 @@ import org.thymeleaf.templateresolver.ITemplateResolver;
  * @author Silvio Wangler (silvio.wangler@onstructive.ch)
  */
 @Factory
+@Requires(property = "oms.engine.thymeleaf.enabled", value = "true")
 @Slf4j
-public class TemplateBeanFactory {
+public class ThymeleafTemplateBeanFactory {
 
   @Bean
   public TemplateEngine templateEngine(

@@ -15,10 +15,21 @@
 */
 package ch.silviowangler.oms;
 
-import java.io.ByteArrayOutputStream;
+import gg.jte.ContentType;
+import gg.jte.TemplateEngine;
+import io.micronaut.context.annotation.Bean;
+import io.micronaut.context.annotation.Factory;
+import io.micronaut.context.annotation.Requires;
+import lombok.extern.slf4j.Slf4j;
 
-public interface TemplateEngineFacade {
-
-  ByteArrayOutputStream process(
-      TemplateContext templateContext, Instruction instruction, Object bindingObject);
+@Factory
+@Requires(property = "oms.engine.jte.enabled", value = "true")
+@Slf4j
+public class JteTemplateBeanFactory {
+  @Bean
+  public TemplateEngine templateEngine() {
+    TemplateEngine templateEngine = TemplateEngine.createPrecompiled(ContentType.Html);
+    templateEngine.setBinaryStaticContent(true);
+    return templateEngine;
+  }
 }

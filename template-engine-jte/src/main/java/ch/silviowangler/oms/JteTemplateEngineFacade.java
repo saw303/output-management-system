@@ -15,33 +15,45 @@
 */
 package ch.silviowangler.oms;
 
+import gg.jte.TemplateEngine;
+import gg.jte.output.Utf8ByteOutput;
 import io.micronaut.context.annotation.Requires;
+import io.micronaut.context.annotation.Value;
 import jakarta.inject.Singleton;
 import java.io.ByteArrayOutputStream;
-import java.io.OutputStreamWriter;
-import java.io.Writer;
-import lombok.RequiredArgsConstructor;
-import org.thymeleaf.TemplateEngine;
-import org.thymeleaf.context.Context;
+import java.io.IOException;
+import java.util.Map;
+import lombok.SneakyThrows;
 
 @Singleton
-@Requires(property = "oms.engine.thymeleaf.enabled", value = "true")
-@RequiredArgsConstructor
-public class ThymeleafTemplateEngineFacade implements TemplateEngineFacade {
+@Requires(property = "oms.engine.jte.enabled", value = "true")
+public class JteTemplateEngineFacade implements TemplateEngineFacade {
 
   private final TemplateEngine templateEngine;
+  private final String omsPrefix;
+
+  public JteTemplateEngineFacade(
+      TemplateEngine templateEngine, @Value("${oms.prefix:oms-}") String omsPrefix) {
+    this.templateEngine = templateEngine;
+    this.omsPrefix = omsPrefix;
+  }
 
   @Override
+  @SneakyThrows({IOException.class})
   public ByteArrayOutputStream process(
       TemplateContext templateContext, Instruction instruction, Object bindingObject) {
 
     ByteArrayOutputStream out = new ByteArrayOutputStream();
-    Writer writer = new OutputStreamWriter(out);
-
-    Context context = new Context(templateContext.locale());
-    context.setVariable(instruction.getBindingVariableName(), bindingObject);
-    templateEngine.process(templateContext.templateId().toString(), context, writer);
-
+    Utf8ByteOutput output = new Utf8ByteOutput();
+    templateEngine.render(
+        this.omsPrefix + templateContext.templateId().toString(),
+        Map.of(
+            instruction.getBindingVariableName(),
+            bindingObject,
+            "locale",
+            templateContext.locale()),
+        output);
+    output.writeTo(out);
     return out;
   }
 }

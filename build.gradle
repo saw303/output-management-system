@@ -4,7 +4,7 @@ plugins {
   id "io.micronaut.library" version "$micronautGradlePluginVersion" apply false
   id 'ch.onstructive.gradle.release' version "${onstructiveGradlePluginVersion}" apply false
   id 'ch.onstructive.gradle.codestyle' version "${onstructiveGradlePluginVersion}" apply false
-  id 'gg.jte.gradle' version '2.2.2' apply false
+  id 'gg.jte.gradle' version "${jteVersion}" apply false
 }
 
 subprojects { subproject ->
@@ -32,7 +32,7 @@ subprojects { subproject ->
     compileOnly("org.projectlombok:lombok")
 
     implementation("io.micronaut:micronaut-validation")
-    compileOnly("javax.inject:javax.inject:1")
+    implementation("jakarta.annotation:jakarta.annotation-api")
 
     implementation "org.mapstruct:mapstruct:${mapstructVersion}"
 

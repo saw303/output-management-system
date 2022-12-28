@@ -1,0 +1,20 @@
+plugins {
+  id 'gg.jte.gradle'
+}
+
+jte {
+  precompile()
+}
+
+jar {
+  dependsOn precompileJte
+  from fileTree("jte-classes") {
+    include "**/*.class"
+  }
+}
+
+dependencies {
+  implementation 'javax.money:money-api:1.1'
+  implementation 'org.javamoney:moneta:1.4.2'
+  implementation "gg.jte:jte:${jteVersion}"
+}

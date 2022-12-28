@@ -84,17 +84,17 @@ public class DefaultTemplateService implements TemplateService {
           mergerUtility.setDocumentMergeMode(OPTIMIZE_RESOURCES_MODE);
 
           for (Object b : bindingObjects) {
-            byte[] content = process(templateContext, instruction, b);
-            mergerUtility.addSource(new ByteArrayInputStream(content));
+            ByteArrayOutputStream content = process(templateContext, instruction, b);
+            mergerUtility.addSource(new ByteArrayInputStream(content.toByteArray()));
           }
           mergerUtility.mergeDocuments(MemoryUsageSetting.setupMainMemoryOnly());
-          return new ProcessResult(templateContext.requestedOutput(), destStream.toByteArray());
+          return new ProcessResult(templateContext.requestedOutput(), destStream);
         } catch (IOException e) {
           log.error("Unable to process document", e);
           throw new RuntimeException("Failed to process template " + templateId, e);
         }
       } else {
-        byte[] content = process(templateContext, instruction, bindingObject);
+        ByteArrayOutputStream content = process(templateContext, instruction, bindingObject);
         return new ProcessResult(templateContext.requestedOutput(), content);
       }
     } catch (JsonProcessingException e) {
@@ -103,15 +103,16 @@ public class DefaultTemplateService implements TemplateService {
     }
   }
 
-  private byte[] process(
+  private ByteArrayOutputStream process(
       TemplateContext templateContext, Instruction instruction, Object bindingObject) {
 
-    byte[] content = templateEngineFacade.process(templateContext, instruction, bindingObject);
+    ByteArrayOutputStream out =
+        templateEngineFacade.process(templateContext, instruction, bindingObject);
 
     if (Objects.equals(templateContext.requestedOutput(), MediaType.APPLICATION_PDF_TYPE)) {
-      return pdfProducer.producePdf(content);
+      return pdfProducer.producePdf(out.toByteArray());
     }
-    return content;
+    return out;
   }
 
   private Instruction findInstruction(TemplateContext templateContext) {

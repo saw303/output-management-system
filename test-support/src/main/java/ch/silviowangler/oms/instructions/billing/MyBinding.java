@@ -13,12 +13,28 @@
    See the License for the specific language governing permissions and
    limitations under the License.
 */
-package ch.silviowangler.oms;
+package ch.silviowangler.oms.instructions.billing;
 
-import java.io.ByteArrayOutputStream;
+import java.time.LocalDate;
 
-public interface TemplateEngineFacade {
+public class MyBinding {
 
-  ByteArrayOutputStream process(
-      TemplateContext templateContext, Instruction instruction, Object bindingObject);
+  private String name;
+  private LocalDate dob;
+
+  public String getName() {
+    return name;
+  }
+
+  public void setName(String name) {
+    this.name = name;
+  }
+
+  public LocalDate getDob() {
+    return dob;
+  }
+
+  public void setDob(LocalDate dob) {
+    this.dob = dob;
+  }
 }

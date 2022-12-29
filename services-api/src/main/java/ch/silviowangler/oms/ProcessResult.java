@@ -16,11 +16,12 @@
 package ch.silviowangler.oms;
 
 import io.micronaut.http.MediaType;
+import java.io.ByteArrayOutputStream;
 import lombok.Value;
 
 @Value
 public class ProcessResult {
 
   private final MediaType mediaType;
-  private final byte[] content;
+  private final ByteArrayOutputStream content;
 }

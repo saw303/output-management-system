@@ -16,7 +16,10 @@
 package ch.silviowangler.oms;
 
 import jakarta.inject.Singleton;
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -39,7 +42,7 @@ public class DefaultLibreOfficePdfProducer implements PdfProducer {
   private static final String OS_NAME_LINUX = "linux";
 
   @Override
-  public byte[] producePdf(byte[] content) {
+  public ByteArrayOutputStream producePdf(byte[] content) {
     try {
       return buildPdfFile(content, File.createTempFile("oms", ".fodt"));
     } catch (IOException | InterruptedException e) {
@@ -48,7 +51,7 @@ public class DefaultLibreOfficePdfProducer implements PdfProducer {
     }
   }
 
-  private byte[] buildPdfFile(byte[] content, File fileIn)
+  private ByteArrayOutputStream buildPdfFile(byte[] content, File fileIn)
       throws IOException, InterruptedException {
     File fileOut =
         new File(
@@ -92,16 +95,29 @@ public class DefaultLibreOfficePdfProducer implements PdfProducer {
           libreOfficeInstallationDirectory.getAbsolutePath());
     }
 
-    byte[] pdf = Files.readAllBytes(fileOut.toPath());
-
     log.debug("Deleting files: '{}' and '{}'", fileIn.getPath(), fileOut.getPath());
+
+    byte[] buffer = new byte[4096];
+    BufferedInputStream bis = new BufferedInputStream(new FileInputStream(fileOut));
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    int bytes = 0;
+    while ((bytes = bis.read(buffer, 0, buffer.length)) > 0) {
+      baos.write(buffer, 0, bytes);
+    }
+    baos.close();
+    bis.close();
 
     Files.deleteIfExists(fileIn.toPath());
     Files.deleteIfExists(fileOut.toPath());
-    return pdf;
+
+    return baos;
   }
 
-  /** Creates a command link according to https://stackoverflow.com/a/67870597/960875 */
+  /**
+   * Creates a command link according to a post at Stack Overflow.
+   *
+   * @see <a href="https://stackoverflow.com/a/67870597/960875">Post</a>
+   */
   private String[] getPlatformSpecificProcessStartArguments(
       final String operatingSystem,
       final String exec,

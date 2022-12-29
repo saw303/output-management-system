@@ -1,0 +1,4 @@
+dependencies {
+  api project(":${rootProject.name}-template-engine-api")
+  implementation "gg.jte:jte:${jteVersion}"
+}

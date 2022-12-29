@@ -31,9 +31,11 @@ rootProject.name="oms"
 
 include 'template-engine-api'
 include 'template-engine-thymeleaf'
+include 'template-engine-jte'
 include 'server'
 include 'services'
 include 'services-api'
 include 'rest-api'
+include 'test-support'
 
 rootProject.children.each { it.name = "${rootProject.name}-${it.name}" }

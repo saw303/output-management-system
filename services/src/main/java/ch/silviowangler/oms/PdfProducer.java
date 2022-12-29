@@ -15,6 +15,8 @@
 */
 package ch.silviowangler.oms;
 
+import java.io.ByteArrayOutputStream;
+
 public interface PdfProducer {
-  byte[] producePdf(byte[] content);
+  ByteArrayOutputStream producePdf(byte[] content);
 }

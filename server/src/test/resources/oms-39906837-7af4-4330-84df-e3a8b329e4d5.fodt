@@ -614,7 +614,7 @@
    <text:p text:style-name="Heading">Rechnung Nr. <text:span th:text="${document.invoiceNumber}">Nummer</text:span></text:p>
    <text:p text:style-name="Heading">Leistungszeitraum: <text:span th:text="${document.servicePeriod}">Januar 2022</text:span></text:p>
    <text:p text:style-name="Standard"/>
-   <text:p text:style-name="Standard">Für unsere Arbeiten im Rahmen des Projekts CONSULTA stellen wir Ihnen vereinbarungsgemäss folgende Leistungen in Rechnung:</text:p>
+   <text:p text:style-name="Standard">Für unsere Arbeiten im Rahmen des Projekts <text:span th:text="#{project.name}">Consulta</text:span> stellen wir Ihnen vereinbarungsgemäss folgende Leistungen in Rechnung:</text:p>
    <text:p text:style-name="Standard"/>
    <table:table table:name="Table1" table:style-name="Table1">
     <table:table-column table:style-name="Table1.A" table:number-columns-repeated="3"/>

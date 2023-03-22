@@ -87,6 +87,9 @@ class ThymeleafTemplateControllerSpec extends Specification {
 
     and:
     noExceptionThrown()
+
+    and: 'contains translated and XML encoded message Süüüü'
+    body.contains('S&#xfc;&#xfc;&#xfc;&#xfc;')
   }
 
   void "Render onstructive invoice as PDF"() {

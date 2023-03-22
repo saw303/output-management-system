@@ -25,6 +25,7 @@ import java.util.Set;
 import lombok.extern.slf4j.Slf4j;
 import org.thymeleaf.TemplateEngine;
 import org.thymeleaf.dialect.IDialect;
+import org.thymeleaf.messageresolver.IMessageResolver;
 import org.thymeleaf.templatemode.TemplateMode;
 import org.thymeleaf.templateresolver.ClassLoaderTemplateResolver;
 import org.thymeleaf.templateresolver.ITemplateResolver;
@@ -39,7 +40,9 @@ public class ThymeleafTemplateBeanFactory {
 
   @Bean
   public TemplateEngine templateEngine(
-      Set<ITemplateResolver> templateResolvers, Set<IDialect> dialects) {
+      Set<ITemplateResolver> templateResolvers,
+      Set<IMessageResolver> messageResolvers,
+      Set<IDialect> dialects) {
     TemplateEngine templateEngine = new TemplateEngine();
 
     if (dialects != null) {
@@ -50,6 +53,10 @@ public class ThymeleafTemplateBeanFactory {
             dialect.getClass().getCanonicalName());
         templateEngine.addDialect(dialect);
       }
+    }
+
+    if (messageResolvers != null || !messageResolvers.isEmpty()) {
+      templateEngine.setMessageResolvers(messageResolvers);
     }
 
     templateEngine.setTemplateResolvers(requireNonEmpty(templateResolvers, "templateResolvers"));

@@ -1,4 +1,4 @@
 dependencies {
   api project(":${rootProject.name}-template-engine-api")
-  implementation "org.thymeleaf:thymeleaf:${thymeleafVersion}"
+  implementation "org.thymeleaf:thymeleaf"
 }
